@@ -4,6 +4,7 @@ import { SyncManager } from './components/Account';
 import { Layout } from './components/Layout';
 import { useStore } from './lib/store';
 import Onboarding from './pages/Onboarding';
+import PrivacyPage from './pages/PrivacyPage';
 import SessionPage from './pages/SessionPage';
 import SettingsPage from './pages/SettingsPage';
 import TopicsPage from './pages/TopicsPage';
@@ -13,6 +14,8 @@ const StatsPage = lazy(() => import('./pages/StatsPage'));
 
 export default function App() {
   const onboarded = useStore((s) => s.plan.onboarded);
+  // Public page: readable without signing in or finishing setup (linked from Google's sign-in screen)
+  if (window.location.pathname.startsWith('/privacy')) return <PrivacyPage />;
 
   return (
     <>

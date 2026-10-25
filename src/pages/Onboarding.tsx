@@ -133,6 +133,12 @@ export default function Onboarding() {
             </>
           )}
         </div>
+
+        <p className="mt-5 text-center text-xs text-muted">
+          <a href="/privacy" className="underline underline-offset-4">
+            Privacy policy
+          </a>
+        </p>
       </div>
     </div>
   );

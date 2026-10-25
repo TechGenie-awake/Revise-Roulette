@@ -136,6 +136,12 @@ export default function SettingsPage() {
         </button>
       </Section>
 
+      <p className="text-center text-sm text-muted">
+        <a href="/privacy" className="underline underline-offset-4">
+          Privacy policy
+        </a>
+      </p>
+
       <ConfirmModal
         open={confirmReset}
         title="Reset everything?"

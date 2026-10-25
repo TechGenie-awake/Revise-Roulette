@@ -1,0 +1,14 @@
+{
+  "name": "Revise Roulette",
+  "short_name": "Revise Roulette",
+  "description": "Spin the wheel, learn a topic, talk it out.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFF6E9",
+  "theme_color": "#FFF6E9",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icon-180.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}

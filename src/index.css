@@ -1,0 +1,188 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-display: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+  --color-ink: #1d1a24;
+  --color-ink-soft: #4a4553;
+  --color-muted: #6b6573;
+  --color-cream: #fff6e9;
+  --color-paper: #fffdf8;
+
+  --color-blush: #ffc8dd;
+  --color-sky: #bde0fe;
+  --color-mint: #b8f2d9;
+  --color-butter: #fff1a8;
+  --color-lilac: #d9c8ff;
+  --color-peach: #ffd3b6;
+  --color-coral: #ffb5a7;
+  --color-lime: #d4f5a8;
+  --color-rose: #ff9aae;
+
+  --shadow-nb: 4px 4px 0 0 var(--color-ink);
+  --shadow-nb-sm: 2px 2px 0 0 var(--color-ink);
+  --shadow-nb-lg: 6px 6px 0 0 var(--color-ink);
+
+  --animate-pop: pop 0.35s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+  --animate-sheet: sheet 0.3s cubic-bezier(0.2, 0.9, 0.3, 1) both;
+  --animate-fade: fade 0.2s ease-out both;
+
+  @keyframes pop {
+    from {
+      transform: scale(0.85);
+      opacity: 0;
+    }
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+  @keyframes sheet {
+    from {
+      transform: translateY(40px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  @keyframes fade {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+}
+
+html {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-cream);
+  background-image: radial-gradient(rgb(29 26 36 / 0.09) 1px, transparent 1.2px);
+  background-size: 22px 22px;
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  overscroll-behavior-y: none;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+}
+
+button {
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+@layer components {
+  .nb-card {
+    background: var(--color-paper);
+    border: 2.5px solid var(--color-ink);
+    border-radius: 20px;
+    box-shadow: var(--shadow-nb);
+  }
+
+  .nb-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 48px;
+    padding: 0.65rem 1.15rem;
+    border: 2.5px solid var(--color-ink);
+    border-radius: 14px;
+    background: var(--color-paper);
+    box-shadow: var(--shadow-nb);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--color-ink);
+    transition:
+      transform 0.08s ease,
+      box-shadow 0.08s ease;
+    user-select: none;
+  }
+  .nb-btn:active:not(:disabled) {
+    transform: translate(3px, 3px);
+    box-shadow: 1px 1px 0 0 var(--color-ink);
+  }
+  .nb-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+  .nb-btn:focus-visible,
+  .nb-chip:focus-visible,
+  .nb-input:focus-visible {
+    outline: 3px solid #7c5cfa;
+    outline-offset: 2px;
+  }
+
+  .nb-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.2rem 0.6rem;
+    border: 2px solid var(--color-ink);
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.25rem;
+    white-space: nowrap;
+    background: var(--color-paper);
+  }
+
+  .nb-input {
+    width: 100%;
+    min-height: 48px;
+    padding: 0.6rem 0.9rem;
+    border: 2.5px solid var(--color-ink);
+    border-radius: 14px;
+    background: var(--color-paper);
+    font-size: 1rem;
+    color: var(--color-ink);
+  }
+
+  .nb-seg {
+    display: flex;
+    gap: 0.35rem;
+    padding: 0.3rem;
+    border: 2.5px solid var(--color-ink);
+    border-radius: 16px;
+    background: var(--color-paper);
+  }
+  .nb-seg > button {
+    flex: 1;
+    min-height: 40px;
+    padding: 0.4rem 0.6rem;
+    border-radius: 11px;
+    border: 2px solid transparent;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+  .nb-seg > button[aria-pressed='true'] {
+    background: var(--color-butter);
+    border-color: var(--color-ink);
+    box-shadow: var(--shadow-nb-sm);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

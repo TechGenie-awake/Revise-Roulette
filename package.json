@@ -1,0 +1,41 @@
+{
+  "name": "revise-roulette",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently -k -n web,api -c magenta,cyan \"vite --host\" \"npm:dev:api\"",
+    "dev:web": "vite --host",
+    "dev:api": "tsx watch --env-file=.env server/dev.ts",
+    "db:migrate": "tsx --env-file=.env server/migrate.ts",
+    "build": "tsc && vite build",
+    "preview": "vite preview --host",
+    "typecheck": "tsc"
+  },
+  "dependencies": {
+    "@hono/node-server": "^2.1.5",
+    "better-auth": "^1.7.12",
+    "canvas-confetti": "^1.9.4",
+    "hono": "^4.13.13",
+    "pg": "^8.23.1",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-router": "^8.5.0",
+    "recharts": "^3.10.1",
+    "zustand": "^5.0.16"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/canvas-confetti": "^1.9.0",
+    "@types/node": "^26.6.5",
+    "@types/pg": "^8.23.1",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "concurrently": "^10.0.6",
+    "tailwindcss": "^4.3.3",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.5"
+  }
+}

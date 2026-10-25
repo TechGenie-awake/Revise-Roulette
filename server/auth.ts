@@ -1,5 +1,5 @@
 import { betterAuth } from 'better-auth';
-import { pool } from './db';
+import { pool } from './db.js';
 
 export const googleEnabled = !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
 

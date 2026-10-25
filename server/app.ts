@@ -1,11 +1,11 @@
 import { Hono } from 'hono';
 import { createMiddleware } from 'hono/factory';
 import type { PoolClient } from 'pg';
-import { DECK, TOPIC_BY_ID } from '../src/data/ophthalmology';
+import { DECK, TOPIC_BY_ID } from '../src/data/ophthalmology.js';
 import type { SyncState } from '../src/lib/merge';
 import type { Plan, StudySession, TopicProgress } from '../src/lib/types';
-import { auth, googleEnabled } from './auth';
-import { pool } from './db';
+import { auth, googleEnabled } from './auth.js';
+import { pool } from './db.js';
 
 type Vars = { Variables: { userId: string } };
 

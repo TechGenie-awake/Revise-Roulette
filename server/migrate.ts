@@ -1,7 +1,7 @@
 // Creates / updates all tables. Safe to run repeatedly: `npm run db:migrate`
 import { getMigrations } from 'better-auth/db/migration';
-import { auth } from './auth';
-import { pool } from './db';
+import { auth } from './auth.js';
+import { pool } from './db.js';
 
 const APP_SCHEMA = `
 create table if not exists user_plan (

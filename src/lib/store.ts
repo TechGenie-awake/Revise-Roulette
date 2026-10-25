@@ -37,6 +37,28 @@ export function phaseRemaining(a: ActiveSession, now = Date.now()): number {
   return Math.max(0, a.durationMs - phaseElapsed(a, now));
 }
 
+/** Best rating allowed for how much of the checklist she covered out loud */
+export function maxRating(covered: number, total: number): Rating {
+  if (covered >= total) return 3;
+  if (covered >= Math.ceil(total / 2)) return 2;
+  return 1;
+}
+
+/** Saves the current step's clock into its slot so the step can be resumed later */
+function stash(a: ActiveSession, now: number): ActiveSession {
+  if (a.phase === 'learn') return { ...a, learnMs: phaseElapsed(a, now), learnDurationMs: a.durationMs };
+  if (a.phase === 'talk') return { ...a, talkMs: phaseElapsed(a, now), talkDurationMs: a.durationMs };
+  return a;
+}
+
+/** Enters a step where it was left off; the clock runs unless that step's time is already used up */
+function enter(a: ActiveSession, phase: 'learn' | 'talk', plannedMs: number, now: number): ActiveSession {
+  const elapsed = phase === 'learn' ? a.learnMs : a.talkMs;
+  const duration = (phase === 'learn' ? a.learnDurationMs : a.talkDurationMs) || plannedMs;
+  const left = elapsed < duration;
+  return { ...a, phase, elapsedMs: elapsed, durationMs: duration, runningSince: left ? now : null, timeUp: !left };
+}
+
 interface State {
   plan: Plan;
   progress: Record<string, TopicProgress>;
@@ -57,6 +79,8 @@ interface State {
   addMinutes: (min: number) => void;
   timeUp: () => void;
   finishPhase: () => void;
+  /** Talk → Learn, or Rate → Talk */
+  goBack: () => void;
   toggleCovered: (index: number) => void;
   rate: (rating: Rating) => void;
   abandon: () => void;
@@ -176,21 +200,23 @@ export const useStore = create<State>()(
         const a = get().active;
         if (!a) return;
         const now = Date.now();
+        const planned = minutesFor(get().plan, TOPIC_BY_ID[a.topicId].tier);
         if (a.phase === 'learn') {
-          const topic = TOPIC_BY_ID[a.topicId];
-          set({
-            active: {
-              ...a,
-              phase: 'talk',
-              learnMs: phaseElapsed(a, now),
-              durationMs: minutesFor(get().plan, topic.tier).talk * 60_000,
-              elapsedMs: 0,
-              runningSince: now,
-              timeUp: false,
-            },
-          });
+          set({ active: enter(stash(a, now), 'talk', planned.talk * 60_000, now) });
         } else if (a.phase === 'talk') {
-          set({ active: { ...a, phase: 'rate', talkMs: phaseElapsed(a, now), runningSince: null, timeUp: false } });
+          set({ active: { ...stash(a, now), phase: 'rate', runningSince: null, timeUp: false } });
+        }
+      },
+
+      goBack: () => {
+        const a = get().active;
+        if (!a) return;
+        const now = Date.now();
+        const planned = minutesFor(get().plan, TOPIC_BY_ID[a.topicId].tier);
+        if (a.phase === 'rate') {
+          set({ active: enter(a, 'talk', planned.talk * 60_000, now) });
+        } else if (a.phase === 'talk') {
+          set({ active: enter(stash(a, now), 'learn', planned.learn * 60_000, now) });
         }
       },
 
@@ -204,6 +230,8 @@ export const useStore = create<State>()(
       rate: (rating) => {
         const a = get().active;
         if (!a) return;
+        // A topic only counts as done once its points were actually covered
+        if (rating > maxRating(a.covered.length, TOPIC_BY_ID[a.topicId]?.asks.length ?? 0)) return;
         const session = closeSession(a, 'completed', rating);
         const satisfied = rating >= 2;
         set((s) => ({

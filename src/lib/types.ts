@@ -90,8 +90,12 @@ export interface ActiveSession {
   /** Set while the timer runs; null when paused or time is up */
   runningSince: number | null;
   timeUp: boolean;
+  /** Time spent in each step so far (kept when she goes back a step) */
   learnMs: number;
   talkMs: number;
+  /** Each step's length including any +5 min; unset until she has left that step once */
+  learnDurationMs?: number;
+  talkDurationMs?: number;
   /** Indexes of asks she ticked as covered while talking */
   covered: number[];
 }

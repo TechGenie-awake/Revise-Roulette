@@ -5,7 +5,7 @@ import { TOPIC_BY_ID } from '../data/ophthalmology';
 import { useNow } from '../components/Layout';
 import { ChapterChip, ConfirmModal, Icon, TierBadge, formatClock } from '../components/ui';
 import { unlockAudio } from '../lib/sound';
-import { phaseElapsed, phaseRemaining, useStore, useToast } from '../lib/store';
+import { maxRating, phaseElapsed, phaseRemaining, useStore, useToast } from '../lib/store';
 import type { Phase, Rating } from '../lib/types';
 
 const PHASES: { id: Phase; label: string }[] = [
@@ -48,7 +48,7 @@ function TimerRing({ fraction, children, alert }: { fraction: number; children: 
 
 export default function SessionPage() {
   const active = useStore((s) => s.active);
-  const { pause, resume, addMinutes, finishPhase, toggleCovered, rate, abandon } = useStore.getState();
+  const { pause, resume, addMinutes, finishPhase, goBack, toggleCovered, rate, abandon } = useStore.getState();
   const showToast = useToast((s) => s.show);
   const navigate = useNavigate();
   const now = useNow(!!active?.runningSince, 250);
@@ -62,6 +62,12 @@ export default function SessionPage() {
   const fraction = active.durationMs ? phaseElapsed(active, now) / active.durationMs : 0;
   const running = !!active.runningSince;
   const phaseIdx = PHASES.findIndex((p) => p.id === active.phase);
+  const total = topic.asks.length;
+  const best = maxRating(active.covered.length, total);
+  const missed = topic.asks.filter((_, i) => !active.covered.includes(i));
+  const needForOkay = Math.ceil(total / 2);
+  const lockReason = (r: Rating) =>
+    r === 3 ? `Cover all ${total} points to unlock` : `Cover at least ${needForOkay} of ${total} points to unlock`;
 
   const onRate = (rating: Rating) => {
     rate(rating);
@@ -113,25 +119,48 @@ export default function SessionPage() {
 
       {active.phase === 'rate' ? (
         <div className="nb-card mt-6 p-5 sm:p-6">
-          <h2 className="text-2xl font-bold">How did that go?</h2>
-          <p className="mt-1 text-ink-soft">
-            You covered {active.covered.length} of {topic.asks.length} points out loud. Be honest, the wheel won't judge.
-          </p>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h2 className="text-2xl font-bold">How did that go?</h2>
+              <p className="mt-1 text-ink-soft">
+                You covered <b className="text-ink">{active.covered.length} of {total}</b> points out loud.
+              </p>
+            </div>
+            <button className="nb-btn min-h-11 text-sm" onClick={goBack}>
+              ← Back to Talk
+            </button>
+          </div>
+
+          {missed.length > 0 && (
+            <div className="mt-4 rounded-xl border-2 border-ink bg-peach/50 p-3.5">
+              <p className="text-sm font-bold">Not covered yet</p>
+              <ul className="mt-1.5 grid gap-1 text-sm">
+                {missed.map((a) => (
+                  <li key={a.text}>• {a.text}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           <div className="mt-5 grid gap-3 sm:grid-cols-3">
-            {RATINGS.map((r) => (
-              <button
-                key={r.rating}
-                onClick={() => onRate(r.rating)}
-                className="nb-btn h-auto justify-start gap-4 p-4 text-left sm:flex-col sm:items-center sm:gap-1 sm:text-center"
-                style={{ background: r.color }}
-              >
-                <span className="text-4xl">{r.emoji}</span>
-                <span>
-                  <span className="block text-xl">{r.title}</span>
-                  <span className="block font-sans text-sm font-medium text-ink-soft">{r.body}</span>
-                </span>
-              </button>
-            ))}
+            {RATINGS.map((r) => {
+              const locked = r.rating > best;
+              return (
+                <button
+                  key={r.rating}
+                  onClick={() => onRate(r.rating)}
+                  disabled={locked}
+                  className="nb-btn h-auto justify-start gap-4 p-4 text-left sm:flex-col sm:items-center sm:gap-1 sm:text-center"
+                  style={{ background: locked ? 'var(--color-paper)' : r.color }}
+                >
+                  <span className="text-4xl">{locked ? '🔒' : r.emoji}</span>
+                  <span>
+                    <span className="block text-xl">{r.title}</span>
+                    <span className="block font-sans text-sm font-medium text-ink-soft">{locked ? lockReason(r.rating) : r.body}</span>
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
       ) : (
@@ -168,6 +197,11 @@ export default function SessionPage() {
             <button className="nb-btn mt-3 w-full text-lg" style={{ background: 'var(--color-mint)' }} onClick={finishPhase}>
               {active.phase === 'learn' ? 'Done learning → Talk' : 'Done talking → Rate'}
             </button>
+            {active.phase === 'talk' && (
+              <button className="mt-3 w-full text-sm font-semibold text-ink-soft underline underline-offset-4" onClick={goBack}>
+                ← Back to Learn
+              </button>
+            )}
           </div>
 
           <div className="nb-card p-5">
@@ -195,7 +229,10 @@ export default function SessionPage() {
                     {active.covered.length}/{topic.asks.length}
                   </span>
                 </div>
-                <p className="mt-1 text-sm text-ink-soft">Talk to a friend, a mirror or your phone camera. Tap each point once you've covered it.</p>
+                <p className="mt-1 text-sm text-ink-soft">
+                  Talk to a friend, a mirror or your phone camera. Tap each point once you've covered it. Cover half to unlock 🙂 Okay, and
+                  all of them for 💪 Nailed it.
+                </p>
                 <ul className="mt-4 grid gap-2.5">
                   {topic.asks.map((a, i) => {
                     const done = active.covered.includes(i);
